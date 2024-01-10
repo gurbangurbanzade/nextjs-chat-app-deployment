@@ -9,6 +9,7 @@ import { io } from "socket.io-client";
 interface Message {
   id: string;
   msg: string;
+  name: string;
 }
 
 const ChatPanel = () => {
@@ -17,23 +18,28 @@ const ChatPanel = () => {
   const [inbox, setInbox] = useState<Message[]>([]);
   const [socket, setSocket] = useState<any | undefined>(undefined);
   const [message, setMessage] = useState<string>("");
+  const [name, setName] = useState<string>("");
+
   const [msgId, setMsgId] = useState<string | undefined>("");
 
   const sendMessage = () => {
     let msgObj = {
       id: msgId,
       msg: message,
+      name: name,
     };
     console.log(msgObj);
     socket.emit("message", msgObj);
+    setMessage("");
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:3003/");
+    const socket = io("https://primitive-domini-guri.koyeb.app/");
     socket.on("connect", () => {
       console.log("Successfully connected!");
       console.log("socket id", socket.id);
       setMsgId(socket.id);
+      setName(name);
     });
 
     socket.on("message", (message) => {
@@ -78,7 +84,7 @@ const ChatPanel = () => {
                   />
                   <div className={styles.messageContent}>
                     <p className={styles.messageText}>{elem.msg}</p>
-                    <span className={styles.messageUser}>afadasda</span>
+                    <span className={styles.messageUser}>{elem.name}</span>
                   </div>
                 </div>
               </div>
@@ -87,7 +93,16 @@ const ChatPanel = () => {
       </div>
       <div className={styles.sendMessageForm}>
         <input
+          style={{ width: "50px" }}
+          onChange={(e) => setName(e.target.value)}
+          type="text"
+          className={styles.input}
+          placeholder="Type your name"
+        />
+        <br />
+        <input
           onChange={(e) => setMessage(e.target.value)}
+          value={message}
           type="text"
           className={styles.input}
           placeholder="Type your message..."
